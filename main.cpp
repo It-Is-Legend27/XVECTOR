@@ -1,17 +1,16 @@
-#include "Xvector.hpp"
 #include <iostream>
+#include "Xvector.hpp"
+#include <vector>
 using namespace std;
 
 int main()
 {
-    Xvector<string> V;
-    V.resize(2,"Jojo");
-    //V.resize(4);
-    for (auto &&i : V)
+    vector<int> v;
+
+    for (size_t i = 0; i < 1000000000; i++)
     {
-        cout << i << ' ';
+        v.push_back(i);
     }
     
-    // ERROR WITH RESIZE!!!
     
 }
