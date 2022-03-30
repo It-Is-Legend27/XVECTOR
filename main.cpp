@@ -5,12 +5,12 @@ using namespace std;
 
 int main()
 {
-    vector<int> v;
-
-    for (size_t i = 0; i < 1000000000; i++)
+    Xvector<int> v;
+    v.resize(100000000);
+    for (auto &&i : v)
     {
-        v.push_back(i);
+        i = 1;
+        cout << i << ' ';
     }
-    
-    
+        
 }

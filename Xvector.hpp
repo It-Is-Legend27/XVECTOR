@@ -11,6 +11,7 @@
 
 #include <cstddef>   // for size_t
 #include <stdexcept> // for basic exceptions
+#include <memory>    // for allocators
 using namespace std;
 
 template <typename T, typename Alloc = std::allocator<T>>
