@@ -14,15 +14,29 @@
 #include <memory>    // for allocators
 using namespace std;
 
+/**
+ * @brief A container that allows constant time access to any element in the 
+ *        container. Dynamically resizes as needed so the user does not need
+ *        to worry about allocation.
+ * 
+ * @tparam T type of element.
+ * @tparam Alloc type of allocator, default is std::allocator<T> 
+ */
 template <typename T, typename Alloc = std::allocator<T>>
 class Xvector
 {
 private:
-    Alloc alloc;
+    Alloc alloc;                // Allocator for array
     T *data{nullptr};           // Pointer to array
     size_t xvector_size{0};     // Number of elements in array
     size_t xvector_capacity{0}; // Number of elements array can hold before resizing.
 
+    /**
+     * @brief Destroys each element in the array.
+     * 
+     * @param _data Pointer to array.
+     * @param _capacity Size of the array.
+     */
     void destroy_elems(T *_data, size_t _capacity) const;
 
 public:
@@ -30,40 +44,162 @@ public:
     using const_iterator = T const *;
     using allocator_type = Alloc;
 
+    /**
+     * @brief Construct a new Xvector object.
+     * 
+     */
     Xvector();
 
+    /**
+     * @brief Destroy the Xvector object.
+     * 
+     */
     ~Xvector();
 
+    /**
+     * @brief Get the allocator object.
+     * 
+     * @return allocator_type 
+     */
     allocator_type get_allocator() const;
 
+    /**
+     * @brief Tests if the vector is empty.
+     * 
+     * @return true if empty, false otherwise.
+     */
     bool empty() const;
 
+    /**
+     * @brief Returns an iterator to the first element in the vector.
+     * 
+     * @return iterator 
+     */
     iterator begin();
+
+    /**
+     * @brief Returns a constant iterator to the first element in the vector.
+     * 
+     * @return const_iterator 
+     */
     const_iterator begin() const;
 
+    /**
+     * @brief Returns an iterator to the element one past the last element in 
+     *        the vector.
+     * 
+     * @return iterator 
+     */
     iterator end();
+
+    /**
+     * @brief Returns a constant iterator to the element one past the last 
+     *        element in the vector.
+     * 
+     * @return const_iterator 
+     */
     const_iterator end() const;
 
+    /**
+     * @brief Returns the current number of elements in the vector.
+     * 
+     * @return size_t 
+     */
     size_t size() const;
 
+    /**
+     * @brief Returns the maximum number of elements that can be stored in the 
+     *        vector before it must be resized.
+     * 
+     * @return size_t 
+     */
     size_t capacity() const;
 
+    /**
+     * @brief Inserts an element at the end of the vector.
+     * 
+     * @param x The value to be inserted.
+     */
     void push_back(T &&x);
+
+    /**
+     * @brief Inserts an element at the end of the vector.
+     * 
+     * @param x  The element to be inserted.
+     */
     void push_back(const T &x);
 
+    /**
+     * @brief Decreases the size of the vector by 1.
+     * 
+     */
     void pop_back();
 
+    /**
+     * @brief Erases all elements in the vector.
+     * 
+     */
     void clear();
 
+    /**
+     * @brief Erases an element at a given position
+     *  !!! NEEDS REWORKING & ITERATOR FUNCTIONALITY !!!
+     * 
+     * @param pos 
+     */
     void erase(size_t pos);
 
+    /**
+     * @brief Resizes the vector. Inserts default values if vector increases 
+     *        in size.
+     * 
+     * @param new_size New size of the vector.
+     */
     void resize(size_t new_size);
+
+    /**
+     * @brief Resizes the vector.
+     * 
+     * @param new_size New size of the vector. Inserts the value specified if 
+     *        vector increases in size.
+     * @param x Value to be inserted.
+     */
     void resize(size_t new_size, const T &x);
 
+    /**
+     * @brief Subscript access to an element in a vector, similar to C-style
+     *        arrays.
+     * 
+     * @param pos Index of the element to be accessed.
+     * @return T& 
+     */
     T &operator[](size_t pos);
+
+    /**
+     * @brief Subscript access to an element in a vector, similar to C-style
+     *        arrays.
+     * 
+     * @param pos Index of the element to be accessed.
+     * @return T& 
+     */
     const T &operator[](size_t pos) const;
 
+    /**
+     * @brief Returns a reference to a specified element in the vector. Throws
+     *        std::out_of_range if index is not within the range of the vector.
+     * 
+     * @param pos Index of element to be accessed.
+     * @return T& 
+     */
     T &at(size_t pos);
+
+    /**
+     * @brief Returns a reference to a specified element in the vector. Throws
+     *        std::out_of_range if index is not within the range of the vector.
+     * 
+     * @param pos Index of element to be accessed.
+     * @return T& 
+     */
     const T &at(size_t pos) const;
 };
 
@@ -203,7 +339,10 @@ inline void Xvector<T, Alloc>::pop_back()
 template <typename T, typename Alloc>
 void Xvector<T, Alloc>::clear()
 {
-    xvector_size = 0; // Does not affect capacity, just affects size
+    destroy_elems(data,xvector_capacity);
+    alloc.deallocate(data,xvector_capacity);
+    data = nullptr;
+    xvector_size = xvector_capacity = 0;
 }
 
 template <typename T, typename Alloc>
