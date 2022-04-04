@@ -1,16 +1,12 @@
 #include <iostream>
 #include "Xvector.hpp"
-#include <vector>
+#include <string>
 using namespace std;
 
 int main()
 {
-    Xvector<int> v;
-    v.resize(100000000);
-    for (auto &&i : v)
-    {
-        i = 1;
-        cout << i << ' ';
-    }
-        
+    Xvector<string> words;
+
+    words.push_back("hello");
+    
 }

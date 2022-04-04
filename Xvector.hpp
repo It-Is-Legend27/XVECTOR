@@ -23,6 +23,8 @@ private:
     size_t xvector_size{0};     // Number of elements in array
     size_t xvector_capacity{0}; // Number of elements array can hold before resizing.
 
+    void destroy_elems(T *_data, size_t _capacity) const;
+
 public:
     using iterator = T *;
     using const_iterator = T const *;
@@ -65,13 +67,13 @@ public:
     const T &at(size_t pos) const;
 };
 
-/**
- * @brief 
- * 
- * @tparam T type of 
- * @tparam Alloc 
- * @return Xvector<T, Alloc>::allocator_type 
- */
+template <typename T, typename Alloc>
+inline void Xvector<T, Alloc>::destroy_elems(T *_data, size_t _capacity) const
+{
+    for (size_t i = 0; i < _capacity; i++)
+        _data[i].~T();
+}
+
 template <typename T, typename Alloc>
 inline typename Xvector<T, Alloc>::allocator_type Xvector<T, Alloc>::get_allocator() const { return alloc; }
 
@@ -81,8 +83,11 @@ inline Xvector<T, Alloc>::Xvector() {}
 template <typename T, typename Alloc>
 inline Xvector<T, Alloc>::~Xvector()
 {
-    if (data) // If allocated, deallocate
+    if (data) // If allocated, destroy objects and deallocate
+    {
+        destroy_elems(data, xvector_capacity);
         alloc.deallocate(data, xvector_capacity);
+    }
 }
 
 template <typename T, typename Alloc>
@@ -142,6 +147,7 @@ inline void Xvector<T, Alloc>::push_back(T &&x) // r-values
             data[i] = old_data[i];
         }
 
+        destroy_elems(old_data, xvector_size);
         alloc.deallocate(old_data, xvector_size); // Delete old array
         data[xvector_size] = x;                   // Insert value one element past the rear
         xvector_size++;                           // Increment size
@@ -175,6 +181,7 @@ inline void Xvector<T, Alloc>::push_back(const T &x)
             data[i] = old_data[i];
         }
 
+        destroy_elems(old_data, xvector_size);
         alloc.deallocate(old_data, xvector_size); // Delete old array
         data[xvector_size] = x;                   // Insert value one element past the rear
         xvector_size++;                           // Increment size
@@ -253,7 +260,9 @@ void Xvector<T, Alloc>::resize(size_t new_size)
             {
                 data[i] = old_data[i];
             }
-            alloc.deallocate(old_data,xvector_size);
+
+            destroy_elems(old_data, xvector_size);
+            alloc.deallocate(old_data, xvector_size);
             for (size_t i = xvector_size; i < new_size; i++)
             {
                 data[i] = T();
@@ -303,7 +312,9 @@ void Xvector<T, Alloc>::resize(size_t new_size, const T &x)
             {
                 data[i] = old_data[i];
             }
-            alloc.deallocate(old_data,xvector_size);
+            
+            destroy_elems(old_data, xvector_size);
+            alloc.deallocate(old_data, xvector_size);
             for (size_t i = xvector_size; i < new_size; i++)
             {
                 data[i] = x;
